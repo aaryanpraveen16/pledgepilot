@@ -19,7 +19,7 @@ import Rewards from './Pages/Rewards/Rewards';
 
 function App() {
   return (
-    <div className='App'>
+    <div className='App' style={{ position: "relative"}}>
    
       
       <Router>

@@ -1,53 +1,56 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Button, Box, Typography, Grid, Divider } from "@mui/material";
+import { 
+  Button, 
+  Box, 
+  Typography, 
+  Grid, 
+  Divider,
+  Chip,
+  Avatar, 
+  LinearProgress
+} from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
-import BookmarkIcon from "@mui/icons-material/Bookmark";
 import { PaymentButton } from "../../Components/Payment/PaymentButton";
 import { RedirectButton } from "../../Components/Payment/RedirectButton";
 import FollowButton from "../../Components/Buttons/FollowButton";
 import { Milestone } from "../../Components/Milestone/Milestone";
 import { getUserInTheSession } from "../../Utils/SessionStorage";
-import "../../assets/ckEditorStyles/ckEditorStyles.css";
 import { getCampaign } from "../../services/campaingServices";
 import { getUserById } from "../../services/userServices";
 
 const CampaignPage = () => {
-  let [campaign, setCampaign] = useState<any>(null);
-  const [user, setUser] = useState<any>(null);
+  const [campaign, setCampaign] = useState<any>(null);
+  const [owners, setOwners] = useState<any[]>([]);
   const { campaignId } = useParams();
   const navigate = useNavigate();
+  const sessionUser = getUserInTheSession();
 
   useEffect(() => {
     const fetchCampaign = async () => {
       try {
         const campaignResponse = await getCampaign(campaignId);
-        
         setCampaign(campaignResponse);
 
-        if (campaignResponse) {
-          const userResponse = await getUserById(campaignResponse._id);
-          setUser(userResponse);
-        }
+        // Fetch all owners' data
+        const ownersData = await Promise.all(
+          campaignResponse.owners.map(async (owner: any) => {
+            const userData = await getUserById(owner.user);
+            return { ...owner, userData };
+          })
+        );
+        setOwners(ownersData);
       } catch (error) {
-        console.error("Error fetching campaign or user data:", error);
+        console.error("Error fetching campaign data:", error);
       }
     };
 
     fetchCampaign();
   }, [campaignId]);
 
-  const editCampaign = () => {
-    navigate(`/create/${campaignId}`);
-  };
-
-  const redirectToBlog = () => {
-    navigate(`/BlogDashboard/${campaignId}`);
-  };
-
-  const sessionUser = getUserInTheSession();
-  const isOwner = sessionUser?._id === campaign?.owner;
-  const markup = { __html: campaign?.description };
+  const isOwner = sessionUser && campaign?.owners.some(
+    (owner: any) => owner.user === sessionUser._id
+  );
 
   if (!campaign) {
     return (
@@ -60,87 +63,69 @@ const CampaignPage = () => {
   }
 
   return (
-    <Box
-      className="campaign-page"
-      sx={{
-        padding: "40px",
-        maxWidth: "1200px",
-        margin: "5vh auto 0 auto",
-        borderRadius: "8px",
-        // boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-      }}
-    >
-      <Typography
-        variant="h3"
-        sx={{
-          fontWeight: "bold",
-          marginBottom: "20px",
-          textAlign: "center",
-          color: "#333",
-        }}
-      >
+    <Box sx={{ padding: "40px", maxWidth: "1200px", margin: "5vh auto" }}>
+      <Typography variant="h3" sx={{ fontWeight: "bold", mb: 3, textAlign: "center" }}>
         {campaign.name}
       </Typography>
+      
+      {/* Category */}
+      <Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
+        <Chip 
+          label={campaign.category.toUpperCase()} 
+          color="primary" 
+          sx={{ mr: 1 }}
+        />
+        {campaign.subcategory && (
+          <Chip 
+            label={campaign.subcategory} 
+            variant="outlined"
+          />
+        )}
+      </Box>
+
       <Milestone campaignId={campaignId} />
-      <Divider
-        sx={{
-          mb: 4,
-          borderWidth: "2px",
-        }}
-      />
+      <Divider sx={{ mb: 4, borderWidth: "2px" }} />
 
       <Grid container spacing={4}>
         {/* Left Section */}
         <Grid item xs={12} md={8}>
-          <Box
-            className="campaign-description"
-            sx={{
-              backgroundColor: "#fff",
-              padding: "20px",
-              borderRadius: "8px",
-              // boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-              marginBottom: "20px",
-            }}
-          >
-            <Typography variant="h4" sx={{ color: "#333" }}>
-              Campaign Description:
-            </Typography>
+          <Box sx={{ backgroundColor: "#fff", p: 3, borderRadius: 2, mb: 3 }}>
+            <Typography variant="h5" sx={{ mb: 2 }}>Campaign Description</Typography>
             <div
               className="ck-content"
-              dangerouslySetInnerHTML={markup}
-              style={{ lineHeight: 1.6,fontSize: "1rem" }}
+              dangerouslySetInnerHTML={{ __html: campaign.description }}
             />
           </Box>
-          {user && (
-            <Box
-              display="flex"
-              alignItems="center"
-              sx={{
-                padding: "10px",
-                backgroundColor: "#fff",
-                borderRadius: "8px",
-                // boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-              }}
-            >
-              <PersonIcon
-                fontSize="medium"
-                sx={{ marginRight: "8px", color: "#06D6A0" }}
-              />
-              <Typography variant="body1" sx={{ color: "#333" }}>
-                {user.firstName} {user.lastName}
-              </Typography>
-            </Box>
-          )}
+
+          {/* Campaign Owners */}
+          <Box sx={{ backgroundColor: "#fff", p: 3, borderRadius: 2, mb: 3 }}>
+            <Typography variant="h6" sx={{ mb: 2 }}>Campaign Team</Typography>
+            <Grid container spacing={2}>
+              {owners.map((owner, index) => (
+                <Grid item xs={12} key={index}>
+                  <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                    <Avatar sx={{ mr: 2 }}>
+                      <PersonIcon />
+                    </Avatar>
+                    <Box>
+                      <Typography variant="subtitle1">
+                        {owner.userData.firstName} {owner.userData.lastName}
+                      </Typography>
+                      <Typography variant="caption" color="textSecondary">
+                        {owner.role.charAt(0).toUpperCase() + owner.role.slice(1)}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+
           {isOwner && (
             <Button
               variant="contained"
-              color="primary"
-              onClick={editCampaign}
-              sx={{
-                marginTop: "20px",
-                backgroundColor: "#06D6A0",
-                "&:hover": { backgroundColor: "#05B589" },
-              }}
+              onClick={() => navigate(`/create/${campaignId}`)}
+              sx={{ mt: 2 }}
             >
               Edit Campaign
             </Button>
@@ -149,17 +134,23 @@ const CampaignPage = () => {
 
         {/* Right Section */}
         <Grid item xs={12} md={4}>
-          <Box
-            display="flex"
-            flexDirection="column"
-            gap={2}
-            sx={{
-              padding: "20px",
-              backgroundColor: "#fff",
-              borderRadius: "8px",
-              // boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-            }}
-          >
+          <Box sx={{ backgroundColor: "#fff", p: 3, borderRadius: 2 }}>
+            {/* Campaign Stats */}
+            <Typography variant="h6" sx={{ mb: 2 }}>Campaign Progress</Typography>
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="body2" color="textSecondary">
+                Goal: ${campaign.milestone.target}
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                Raised: ${campaign.milestone.progress}
+              </Typography>
+              <LinearProgress 
+                variant="determinate" 
+                value={(campaign.milestone.progress / campaign.milestone.target) * 100} 
+                sx={{ mt: 1 }}
+              />
+            </Box>
+
             <FollowButton campaign={campaign} />
             {sessionUser ? (
               <PaymentButton campaign={campaign} />

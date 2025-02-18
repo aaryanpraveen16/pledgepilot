@@ -53,6 +53,7 @@ function Navbar({
       sx={{
         backgroundColor: "#0B3D3A", // Dark teal for navbar background
         boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+        
       }}
     >
       <Container maxWidth="lg">

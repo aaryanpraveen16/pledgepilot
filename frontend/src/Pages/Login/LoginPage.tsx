@@ -13,8 +13,7 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <Grid container sx={{ height: "100%",
-    position:"absolute",bottom:0}}>
+    <Grid container sx={{ height: "100%"}}>
       {/* Left Side: Image */}
       <Grid
         item
