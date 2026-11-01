@@ -1,9 +1,13 @@
-
 export function getUserInTheSession() {
-    const sessionUser = sessionStorage.getItem("user")
-    if(sessionUser !== null){
-        return JSON.parse(sessionUser)
-    } else {
-        return null
-    }
+  const sessionUser = sessionStorage.getItem("user");
+  if (!sessionUser || sessionUser === "undefined" || sessionUser.trim() === "") {
+    return null;
+  }
+  try {
+    return JSON.parse(sessionUser);
+  } catch (error) {
+    console.error("Failed to parse user from sessionStorage:", error);
+    sessionStorage.removeItem("user");
+    return null;
+  }
 }

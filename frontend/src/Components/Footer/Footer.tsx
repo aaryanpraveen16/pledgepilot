@@ -9,7 +9,7 @@ import {
   FaShieldAlt,
   FaCheckCircle,
 } from "react-icons/fa";
-import { FiArrowRight, FiLock, FiMail } from "react-icons/fi";
+import { FiArrowRight, FiLock, FiGlobe, FiMail } from "react-icons/fi";
 
 const Logo = require("../../assets/pledge-pilot-text.png");
 

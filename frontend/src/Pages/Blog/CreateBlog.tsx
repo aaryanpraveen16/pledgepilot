@@ -10,12 +10,17 @@ import {saveBlog} from "../../services/blogServices";
 const CreateBlog = () => {
   const navigate = useNavigate();
   const user = sessionStorage.getItem("user") ?? "";
-  const profile = JSON.parse(user);
+  let profile: any = {};
+  try {
+    profile = user ? JSON.parse(user) : {};
+  } catch (e) {
+    sessionStorage.removeItem("user");
+  }
 
   const [blogData, saveBlogData] = useState({
     blogTitle: "",
     blogDescription: "",
-    owner: profile._id,
+    owner: profile?._id || "",
     campaignID: "657a0125d6d48c5a1cf6479d"
   });
 

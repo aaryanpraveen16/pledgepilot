@@ -6,7 +6,9 @@
   "type": "module",
   "scripts": {
     "test": "jest",
-    "start": "node server.js"
+    "start": "node server.js",
+    "seed": "node seedCampaigns.js",
+    "seed:fresh": "node seedCampaigns.js --fresh"
   },
   "author": "",
   "license": "ISC",

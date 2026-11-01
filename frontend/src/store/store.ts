@@ -9,7 +9,11 @@ export const store = configureStore({
 // Check localStorage for a user and dispatch setUser action
 const storedUser = localStorage.getItem('user');
 if (storedUser) {
-  store.dispatch(setUser(JSON.parse(storedUser)));
+  try {
+    store.dispatch(setUser(JSON.parse(storedUser)));
+  } catch (error) {
+    localStorage.removeItem('user');
+  }
 }
 // Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<typeof store.getState>
