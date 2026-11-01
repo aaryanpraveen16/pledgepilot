@@ -238,10 +238,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onSearch }) => {
                     : "text-slate-300 hover:text-white hover:bg-slate-800/60"
                 }`}
               >
-                Community
+                About & Community
               </Link>
               <Link
-                to="/rewards"
+                to={isLoggedIn ? "/rewards" : "/login"}
                 className={`px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 ${
                   isActive("/rewards")
                     ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20"
@@ -590,7 +590,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onSearch }) => {
             </Link>
 
             <Link
-              to="/rewards"
+              to={isLoggedIn ? "/rewards" : "/login"}
               className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
                 isActive("/rewards")
                   ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
