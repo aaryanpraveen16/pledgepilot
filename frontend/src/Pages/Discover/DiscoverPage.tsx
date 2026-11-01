@@ -13,19 +13,27 @@ const DiscoverPage = () => {
 
   useEffect(() => {
     const fetchAllCampaigns = async () => {
-      const campaignsData = await discoverCampaign();
-      setCampaigns(campaignsData);
-      setFilteredCampaigns(campaignsData);
+      try {
+        const campaignsData = await discoverCampaign();
+        const safeData = Array.isArray(campaignsData) ? campaignsData : [];
+        setCampaigns(safeData);
+        setFilteredCampaigns(safeData);
+      } catch (error) {
+        console.error("Failed to load campaigns in DiscoverPage:", error);
+        setCampaigns([]);
+        setFilteredCampaigns([]);
+      }
     };
     fetchAllCampaigns();
   }, []);
 
   const handleSearch = (searchQuery: string) => {
+    if (!Array.isArray(campaigns)) return;
     if (searchQuery.trim() === "") {
       setFilteredCampaigns(campaigns); // Reset to all campaigns if search is empty
     } else {
       const results = campaigns.filter((campaign) =>
-        campaign.name.toLowerCase().includes(searchQuery.toLowerCase())
+        campaign?.name?.toLowerCase().includes(searchQuery.toLowerCase())
       );
       setFilteredCampaigns(results);
     }
@@ -84,10 +92,10 @@ const DiscoverPage = () => {
           </Box>
 
           {/* Campaigns Grid */}
-          {filteredCampaigns.length > 0 ? (
+          {Array.isArray(filteredCampaigns) && filteredCampaigns.length > 0 ? (
             <Grid container spacing={3} justifyContent="center">
-              {filteredCampaigns.map((campaign: any) => (
-                <CampaignTile campaignObject={campaign} key={campaign._id} />
+              {filteredCampaigns.map((campaign: any, index: number) => (
+                <CampaignTile campaignObject={campaign} key={campaign._id || campaign.id || index} />
               ))}
             </Grid>
           ) : (

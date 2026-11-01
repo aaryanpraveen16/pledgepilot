@@ -11,9 +11,9 @@ export const discoverCampaign = async () => {
       },
       withCredentials: true,
     });
-    return response?.data;
+    return Array.isArray(response?.data) ? response.data : [];
   } catch (error) {
-    console.error("Error:", error);
-    return false;
+    console.error("Error fetching discover campaigns:", error);
+    return [];
   }
 };

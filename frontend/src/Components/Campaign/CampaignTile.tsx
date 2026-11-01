@@ -1,18 +1,22 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { Card, CardMedia, CardContent, Typography, Box } from "@mui/material";
-import { getUserById } from "../../services/userServices";
 
 const cardImg = require("../../assets/sample-image.jpg");
 
 const CampaignTile = ({ campaignObject }: any) => {
   const DESCRIPTION_THRESHOLD = 35;
 
+  const rawDescription = campaignObject?.description || "";
   const descriptionContent =
-    campaignObject.description.length > DESCRIPTION_THRESHOLD
-      ? `${campaignObject.description.substring(0, DESCRIPTION_THRESHOLD)}...`
-      : campaignObject.description;
+    rawDescription.length > DESCRIPTION_THRESHOLD
+      ? `${rawDescription.substring(0, DESCRIPTION_THRESHOLD)}...`
+      : rawDescription;
   const regex = /(<([^>]+)>)/gi;
+
+  const campaignId = campaignObject?._id || campaignObject?.id || "";
+  const campaignName = campaignObject?.name || "Untitled Campaign";
+  const ownerName = campaignObject?.ownerName || "Creator";
 
   return (
     <Card
@@ -30,14 +34,14 @@ const CampaignTile = ({ campaignObject }: any) => {
         overflow: "hidden",
       }}
       component={Link}
-      to={`/campaigns/campaign/${campaignObject._id}`}
+      to={`/campaigns/campaign/${campaignId}`}
     >
       {/* Campaign Image */}
       <CardMedia
         component="img"
         height="180"
         image={cardImg}
-        alt={`${campaignObject.name} campaign`}
+        alt={`${campaignName} campaign`}
         sx={{
           objectFit: "cover",
           borderBottom: "1px solid #ddd", // Separator between image and content
@@ -53,7 +57,7 @@ const CampaignTile = ({ campaignObject }: any) => {
             marginBottom: "8px",
           }}
         >
-          {campaignObject.name}
+          {campaignName}
         </Typography>
         <Typography
           variant="body2"
@@ -73,7 +77,7 @@ const CampaignTile = ({ campaignObject }: any) => {
               fontSize: "0.85rem",
             }}
           >
-            Created by: {campaignObject.ownerName}
+            Created by: {ownerName}
           </Typography>
         </Box>
       </CardContent>

@@ -1,33 +1,45 @@
 import React, { useEffect, useState } from "react";
-import "./Stats.css"
+import "./Stats.css";
 import { campaignStats } from "../../services/statsServices";
 
 const Stats = () => {
-    const [campaignStatsData, setCampaignStatsData]: any = useState<any>();
-    const [paymentStatsData, setPaymentStatsData]: any = useState<any>();
-    const [rewardStatsData, setRewardStatsData]: any = useState<any>();
+  const [campaignStatsData, setCampaignStatsData] = useState<number | null>(null);
+  const [paymentStatsData, setPaymentStatsData] = useState<number | null>(null);
+  const [rewardStatsData, setRewardStatsData] = useState<number | null>(null);
 
-    useEffect(()=> {
-        const campaignData = async () => {
-            try {
-                const campaignStatsResponse:any = await campaignStats();
-                setCampaignStatsData(campaignStatsResponse.campaignCount); 
-                setPaymentStatsData(campaignStatsResponse.paymentCount);
-                setRewardStatsData(campaignStatsResponse.rewardCount);
-            } catch (error) {
-                console.error('Error fetching campaign stats:', error);
-            }
+  useEffect(() => {
+    let isMounted = true;
+    const fetchCampaignData = async () => {
+      try {
+        const campaignStatsResponse: any = await campaignStats();
+        if (isMounted && campaignStatsResponse) {
+          setCampaignStatsData(campaignStatsResponse.campaignCount ?? 0);
+          setPaymentStatsData(campaignStatsResponse.paymentCount ?? 0);
+          setRewardStatsData(campaignStatsResponse.rewardCount ?? 0);
         }
-        campaignData()
-    },[campaignStatsData])
+      } catch (error) {
+        console.error("Error fetching campaign stats:", error);
+      }
+    };
+    fetchCampaignData();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
-    return (
-        <div className="grid-container">
-            <div className="grid-item">{campaignStatsData !== null ? `${campaignStatsData}` : 'N/A'} <br/> campaigns listed</div>
-            <div className="grid-item">{paymentStatsData !== null ? `$${paymentStatsData}` : 'N/A'} <br/> total donations made</div>
-            <div className="grid-item">{rewardStatsData !== null ? `$${rewardStatsData}` : 'N/A'} <br/> total rewards earned</div>
-        </div>
-    )
-}
+  return (
+    <div className="grid-container">
+      <div className="grid-item">
+        {campaignStatsData != null ? campaignStatsData : "0"} <br /> campaigns listed
+      </div>
+      <div className="grid-item">
+        ${paymentStatsData != null ? paymentStatsData : "0"} <br /> total donations made
+      </div>
+      <div className="grid-item">
+        ${rewardStatsData != null ? rewardStatsData : "0"} <br /> total rewards earned
+      </div>
+    </div>
+  );
+};
 
 export default Stats;
